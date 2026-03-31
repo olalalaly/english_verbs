@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Игра: 100 английских глаголов</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
+  <div class="bg-shape bg-shape-2" aria-hidden="true"></div>
+
+  <main class="app">
+    <header class="app-header">
+      <h1>Тренажер глаголов</h1>
+      <p>Карточки + практика + озвучка</p>
+    </header>
+
+    <nav class="tabs" aria-label="Режимы">
+      <button class="tab is-active" data-mode="cards" type="button">Карточки</button>
+      <button class="tab" data-mode="quiz" type="button">Практика</button>
+      <button class="tab" data-mode="list" type="button">Список</button>
+    </nav>
+
+    <section class="panel mode mode-cards is-active" data-panel="cards">
+      <div class="mode-switch" role="group" aria-label="Тип карточек">
+        <button class="mini-switch cards-dir is-active" data-cards-dir="en" type="button">EN карточка</button>
+        <button class="mini-switch cards-dir" data-cards-dir="ru" type="button">RU → EN</button>
+      </div>
+
+      <div class="card-head">
+        <span class="badge" id="cards-index">0 / 0</span>
+        <div class="inline-actions">
+          <button class="ghost" id="cards-speak-word" type="button">Слово</button>
+          <button class="ghost" id="cards-speak-forms" type="button">Формы</button>
+        </div>
+      </div>
+      <div class="progress-strip">
+        <span class="progress-pill" id="cards-status">Статус</span>
+        <span class="progress-pill" id="cards-rating">Рейтинг</span>
+      </div>
+      <h2 id="cards-main">—</h2>
+      <p id="cards-hint">—</p>
+      <p id="cards-mode-note" class="result"> </p>
+
+      <form id="cards-guess-form" class="inline-form" autocomplete="off" hidden>
+        <label>
+          <span id="cards-guess-label">Введите 1-ю форму (base) на английском</span>
+          <input id="cards-guess-input" type="text" placeholder="Например: go">
+        </label>
+        <button id="cards-guess-check" type="submit">Проверить</button>
+      </form>
+      <p id="cards-guess-result" class="result"> </p>
+
+      <div class="answers" id="cards-answers" hidden>
+        <div class="answer-row">
+          <span class="label">Base:</span>
+          <span id="cards-base"></span>
+        </div>
+        <div class="answer-row">
+          <span class="label">Past:</span>
+          <span id="cards-past"></span>
+        </div>
+        <div class="answer-row">
+          <span class="label">Participle:</span>
+          <span id="cards-participle"></span>
+        </div>
+        <div class="answer-row" id="cards-ru-row">
+          <span class="label">Перевод:</span>
+          <span id="cards-ru-answer"></span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="cards-toggle" type="button">Показать ответ</button>
+        <button id="cards-next" type="button">Следующий</button>
+      </div>
+    </section>
+
+    <section class="panel mode mode-quiz" data-panel="quiz">
+      <div class="mode-switch" role="group" aria-label="Тип тренировки">
+        <button class="mini-switch quiz-dir is-active" data-quiz-dir="ru-all" type="button">RU → 3 формы (по полям)</button>
+        <button class="mini-switch quiz-dir" data-quiz-dir="en-ru" type="button">Формы → RU</button>
+      </div>
+
+      <div class="card-head">
+        <span class="badge" id="quiz-score">0 / 0</span>
+        <div class="inline-actions">
+          <button class="ghost" id="quiz-speak-word" type="button">Слово</button>
+          <button class="ghost" id="quiz-speak-forms" type="button">Формы</button>
+        </div>
+      </div>
+      <div class="progress-strip">
+        <span class="progress-pill" id="quiz-status">Статус</span>
+        <span class="progress-pill" id="quiz-rating">Рейтинг</span>
+      </div>
+      <h2 id="quiz-main">—</h2>
+      <p id="quiz-sub">—</p>
+
+      <form id="quiz-form" autocomplete="off">
+        <label id="quiz-field-base">
+          1-я форма (Base)
+          <input id="quiz-input-base" type="text" placeholder="Например: go">
+        </label>
+        <label id="quiz-field-past">
+          2-я форма (Past)
+          <input id="quiz-input-past" type="text" placeholder="Например: went">
+        </label>
+        <label id="quiz-field-participle">
+          3-я форма (Participle)
+          <input id="quiz-input-participle" type="text" placeholder="Например: gone">
+        </label>
+        <label id="quiz-field-ru" hidden>
+          Перевод на русский
+          <input id="quiz-input-ru" type="text" placeholder="Например: идти, ехать">
+        </label>
+        <div class="actions">
+          <button type="submit">Проверить</button>
+          <button id="quiz-next" type="button">Следующий</button>
+        </div>
+      </form>
+      <p id="quiz-result" class="result"> </p>
+    </section>
+
+    <section class="panel mode mode-list" data-panel="list">
+      <div class="list-toolbar">
+        <label class="search">
+          Поиск
+          <input id="list-search" type="search" placeholder="Введите глагол или перевод">
+        </label>
+        <div class="mode-switch" role="group" aria-label="Фильтр выученности">
+          <button class="mini-switch list-filter is-active" data-list-filter="all" type="button">Все</button>
+          <button class="mini-switch list-filter" data-list-filter="learning" type="button">Не выучено</button>
+          <button class="mini-switch list-filter" data-list-filter="mastered" type="button">Выучено</button>
+        </div>
+      </div>
+      <p id="list-summary" class="result"> </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Base</th>
+              <th>Past</th>
+              <th>Participle</th>
+              <th>Перевод</th>
+              <th>Статус</th>
+              <th>Рейтинг</th>
+              <th>Voice</th>
+            </tr>
+          </thead>
+          <tbody id="list-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="./verbs-data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
