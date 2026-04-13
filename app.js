@@ -1,6 +1,8 @@
 const MASTERED_STREAK = 5;
 const MAX_RATING = 7;
-const PROGRESS_KEY = "verbs.progress.v1";
+
+const PROGRESS_KEY = "verbs.progress.v2";
+const GROUP_KEY = "verbs.active-group.v1";
 const QUIZ_TOTAL_KEY = "verbs.quiz.total";
 const QUIZ_CORRECT_KEY = "verbs.quiz.correct";
 
@@ -14,12 +16,10 @@ const clean = (value) =>
 const splitVariants = (value) => {
   const raw = String(value || "");
   const variants = new Set();
-
   const inParens = [...raw.matchAll(/\(([^)]+)\)/g)].map((match) => match[1]);
   const base = raw.replace(/\([^)]*\)/g, "");
-  const all = [base, ...inParens];
 
-  all.forEach((part) => {
+  [base, ...inParens].forEach((part) => {
     part
       .split(/[,/]| or | или /gi)
       .map((item) => clean(item))
@@ -71,6 +71,24 @@ const isCorrectRu = (input, expectedRaw) => {
   });
 };
 
+const loadJson = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const defaultProgress = () => ({
+  attempts: 0,
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  bestStreak: 0,
+  mastered: false,
+});
+
 const pickVoice = () => {
   const voices = window.speechSynthesis?.getVoices?.() || [];
   return (
@@ -103,39 +121,88 @@ const sourceVerbs =
     : (typeof VERBS !== "undefined" && Array.isArray(VERBS) ? VERBS : []);
 
 const verbs = sourceVerbs.filter((verb) => verb.base);
+const verbByBase = Object.fromEntries(verbs.map((verb) => [verb.base, verb]));
 
-const loadJson = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
+const buildGroups = () => {
+  const groupSpecs = [
+    {
+      id: "1",
+      title: "Формы не меняются",
+      description: "Одинаковые формы или почти одинаковое написание во всех временах.",
+      bases: ["broadcast", "cost", "cut", "fit", "hit", "hurt", "let", "put", "read", "set", "shut"],
+    },
+    {
+      id: "2",
+      title: "Короткие формы на -t / -d",
+      description: "Глаголы с короткой 2-й и 3-й формой, которые удобно заучивать пачкой.",
+      bases: ["build", "burn", "deal", "dream", "feed", "feel", "find", "learn", "leave", "lend", "light", "lose", "mean", "meet"],
+    },
+    {
+      id: "3",
+      title: "Частые короткие формы",
+      description: "Очень частые глаголы с коротким сильным изменением: had, heard, told и похожие.",
+      bases: ["have", "hear", "hold", "keep", "lay", "lead", "make", "pay", "say", "sell", "send", "tell", "stand", "understand"],
+    },
+    {
+      id: "4",
+      title: "Семья -ought / -aught",
+      description: "Рифмующиеся формы типа bought, caught, taught, thought.",
+      bases: ["bring", "buy", "catch", "fight", "seek", "teach", "think"],
+    },
+    {
+      id: "5",
+      title: "Чередование i-a-u",
+      description: "Паттерн begin-began-begun, sing-sang-sung и похожие.",
+      bases: ["begin", "drink", "ring", "sing", "swim", "run"],
+    },
+    {
+      id: "6",
+      title: "Формы на -ew / -own",
+      description: "Похожая цепочка blew-blown, knew-known, grew-grown.",
+      bases: ["blow", "draw", "fly", "grow", "know"],
+    },
+    {
+      id: "7",
+      title: "Формы на -oke / -oken",
+      description: "Похожий рисунок: spoke-spoken, broke-broken, took-taken.",
+      bases: ["break", "choose", "freeze", "speak", "steal", "wake", "shake", "take"],
+    },
+    {
+      id: "8",
+      title: "Сильные формы на -n",
+      description: "Частые сильные глаголы с participle на -n: written, driven, seen.",
+      bases: ["be", "do", "drive", "eat", "give", "go", "hide", "prove", "ride", "rise", "see", "show", "wear", "write"],
+    },
+    {
+      id: "9",
+      title: "Сильные и особые формы",
+      description: "Остальные важные сильные глаголы: became, forgot, got, born и другие.",
+      bases: ["bear", "beat", "become", "come", "dig", "fall", "forbid", "forget", "forgive", "get", "lie", "sew"],
+    },
+    {
+      id: "10",
+      title: "Бытовые и разговорные",
+      description: "Частые слова с вариантами форм: slept, smelt, spoilt, shot, sat.",
+      bases: ["shine", "shoot", "sit", "sleep", "smell", "spell", "spend", "spoil"],
+    },
+  ];
+
+  return groupSpecs.map((group) => ({
+    id: group.id,
+    label: `Группа ${group.id} · ${group.title}`,
+    description: group.description,
+    verbs: group.bases.map((base) => verbByBase[base]).filter(Boolean),
+  }));
 };
 
-const defaultProgress = () => ({
-  attempts: 0,
-  correct: 0,
-  wrong: 0,
-  streak: 0,
-  bestStreak: 0,
-  mastered: false,
-});
-
-let progressStore = loadJson(PROGRESS_KEY, {});
-let cardsPool = [];
-let cardsCursor = 0;
-let cardsShown = false;
-let cardsDirection = "en";
-let quizDirection = "ru-all";
-let listFilter = "all";
-let quizCurrent = null;
-let quizTotal = Number(localStorage.getItem(QUIZ_TOTAL_KEY) || 0);
-let quizCorrect = Number(localStorage.getItem(QUIZ_CORRECT_KEY) || 0);
+const groups = buildGroups();
 
 const els = {
   tabs: document.querySelectorAll(".tab"),
   panels: document.querySelectorAll(".mode"),
+
+  groupSelect: document.getElementById("group-select"),
+  groupSummary: document.getElementById("group-summary"),
 
   cardsDirButtons: document.querySelectorAll(".cards-dir"),
   cardsIndex: document.getElementById("cards-index"),
@@ -157,7 +224,6 @@ const els = {
   cardsSpeakForms: document.getElementById("cards-speak-forms"),
   cardsGuessForm: document.getElementById("cards-guess-form"),
   cardsGuessInput: document.getElementById("cards-guess-input"),
-  cardsGuessCheck: document.getElementById("cards-guess-check"),
   cardsGuessResult: document.getElementById("cards-guess-result"),
 
   quizDirButtons: document.querySelectorAll(".quiz-dir"),
@@ -186,6 +252,18 @@ const els = {
   listBody: document.getElementById("list-body"),
 };
 
+let progressStore = loadJson(PROGRESS_KEY, {});
+let activeGroupId = localStorage.getItem(GROUP_KEY) || groups[0]?.id || "1";
+let cardsPool = [];
+let cardsCursor = 0;
+let cardsShown = false;
+let cardsDirection = "en-ru";
+let quizDirection = "ru-all";
+let listFilter = "all";
+let quizCurrent = null;
+let quizTotal = Number(localStorage.getItem(QUIZ_TOTAL_KEY) || 0);
+let quizCorrect = Number(localStorage.getItem(QUIZ_CORRECT_KEY) || 0);
+
 const saveScore = () => {
   localStorage.setItem(QUIZ_TOTAL_KEY, String(quizTotal));
   localStorage.setItem(QUIZ_CORRECT_KEY, String(quizCorrect));
@@ -193,6 +271,10 @@ const saveScore = () => {
 
 const saveProgress = () => {
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressStore));
+};
+
+const saveActiveGroup = () => {
+  localStorage.setItem(GROUP_KEY, activeGroupId);
 };
 
 const getProgress = (id) => {
@@ -205,16 +287,18 @@ const getProgress = (id) => {
 const getProgressMeta = (id) => {
   const progress = getProgress(id);
   const ratingValue = Math.min(progress.bestStreak, MAX_RATING);
-  const mastered = progress.mastered;
+  const statusText = progress.mastered ? "Выучено" : "Не выучено";
+  const statusClass = progress.mastered ? "mastered" : "learning";
+  const hintText = progress.mastered
+    ? `макс. серия ${progress.bestStreak}`
+    : `до выучено еще ${Math.max(MASTERED_STREAK - progress.streak, 0)}`;
 
   return {
-    mastered,
-    statusText: mastered ? "Выучено" : "Не выучено",
-    statusClass: mastered ? "mastered" : "learning",
+    statusText,
+    statusClass,
     ratingText: `${ratingValue}/${MAX_RATING}`,
-    hintText: mastered
-      ? `макс. серия ${progress.bestStreak}`
-      : `до выучено еще ${Math.max(MASTERED_STREAK - progress.streak, 0)}`,
+    hintText,
+    mastered: progress.mastered,
   };
 };
 
@@ -226,9 +310,7 @@ const recordAttempt = (id, success) => {
     progress.correct += 1;
     progress.streak += 1;
     progress.bestStreak = Math.max(progress.bestStreak, progress.streak);
-    if (progress.streak >= MASTERED_STREAK) {
-      progress.mastered = true;
-    }
+    if (progress.streak >= MASTERED_STREAK) progress.mastered = true;
   } else {
     progress.wrong += 1;
     progress.streak = 0;
@@ -253,27 +335,29 @@ const compareVerbsByProgress = (left, right) => {
     return rightProgress.wrong - leftProgress.wrong;
   }
 
-  return left.base.localeCompare(right.base, "en");
+  return left.id - right.id;
 };
 
-const getOrderedVerbs = () => [...verbs].sort(compareVerbsByProgress);
+const getActiveGroup = () => groups.find((group) => group.id === activeGroupId) || groups[0];
+
+const getActiveGroupVerbs = () => getActiveGroup()?.verbs || [];
+
+const getOrderedActiveVerbs = () => [...getActiveGroupVerbs()].sort(compareVerbsByProgress);
 
 const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
 
 const randomVerb = () => {
-  const ordered = getOrderedVerbs();
+  const ordered = getOrderedActiveVerbs();
   const learning = ordered.filter((verb) => !getProgress(verb.id).mastered);
 
-  if (learning.length && Math.random() < 0.8) {
-    return randomItem(learning);
-  }
-
+  if (!ordered.length) return null;
+  if (learning.length && Math.random() < 0.8) return randomItem(learning);
   return randomItem(ordered);
 };
 
 const syncCardsPool = () => {
   const currentId = cardsPool[cardsCursor]?.id;
-  cardsPool = getOrderedVerbs();
+  cardsPool = getOrderedActiveVerbs();
 
   if (!cardsPool.length) {
     cardsCursor = 0;
@@ -308,12 +392,28 @@ const renderScore = () => {
   els.quizScore.textContent = `${quizCorrect} / ${quizTotal}`;
 };
 
+const renderGroupOptions = () => {
+  els.groupSelect.innerHTML = groups
+    .map((group) => `<option value="${group.id}">${group.label}</option>`)
+    .join("");
+  els.groupSelect.value = getActiveGroup().id;
+};
+
+const renderGroupSummary = () => {
+  const group = getActiveGroup();
+  const learned = group.verbs.filter((verb) => getProgress(verb.id).mastered).length;
+  els.groupSummary.textContent =
+    `${group.label}. ${group.description} В группе ${group.verbs.length} слов, выучено ${learned} из ${group.verbs.length}.`;
+  els.groupSummary.className = "result";
+};
+
 const setNoData = () => {
   els.cardsIndex.textContent = "0 / 0";
   els.cardsMain.textContent = "Данные не загружены";
   els.cardsHint.textContent = "Проверьте файл verbs-data.js";
   els.quizMain.textContent = "Данные не загружены";
   els.quizSub.textContent = "Проверьте файл verbs-data.js";
+  els.groupSummary.textContent = "";
   els.listSummary.textContent = "";
   els.listBody.innerHTML = "";
 };
@@ -326,32 +426,25 @@ const renderCards = () => {
   setProgressPills(els.cardsStatus, els.cardsRating, verb);
   els.cardsIndex.textContent = `${cardsCursor + 1} / ${cardsPool.length}`;
 
-  if (cardsDirection === "en") {
+  if (cardsDirection === "en-ru") {
     els.cardsMain.textContent = verb.base;
-    els.cardsHint.textContent = "Русский перевод скрыт.";
-    els.cardsModeNote.textContent =
-      "В этом режиме ничего вводить не нужно. Нажмите «Показать ответ».";
-    els.cardsModeNote.className = "result";
-    els.cardsGuessForm.hidden = true;
-    els.cardsGuessForm.style.display = "none";
-    els.cardsRuRow.hidden = true;
-    els.cardsGuessResult.textContent = " ";
-    els.cardsGuessResult.className = "result";
+    els.cardsHint.textContent = "Напишите перевод на русский письменно.";
+    els.cardsModeNote.textContent = `${getProgressMeta(verb.id).hintText}. Можно писать одно подходящее значение.`;
+    els.cardsGuessLabel.textContent = "Введите перевод на русский";
+    els.cardsGuessInput.placeholder = "Например: быть";
   } else {
     els.cardsMain.textContent = verb.ru;
-    els.cardsHint.textContent = "Введите только 1-ю форму (base) на английском.";
-    els.cardsModeNote.textContent = getProgressMeta(verb.id).hintText;
-    els.cardsModeNote.className = "result";
+    els.cardsHint.textContent = "Напишите 1-ю форму (base) на английском.";
+    els.cardsModeNote.textContent = `${getProgressMeta(verb.id).hintText}.`;
     els.cardsGuessLabel.textContent = "Введите 1-ю форму (base) на английском";
-    els.cardsGuessForm.hidden = false;
-    els.cardsGuessForm.style.display = "grid";
-    els.cardsRuRow.hidden = false;
+    els.cardsGuessInput.placeholder = "Например: be";
   }
 
   els.cardsBase.textContent = verb.base;
   els.cardsPast.textContent = verb.past;
   els.cardsParticiple.textContent = verb.participle;
   els.cardsRuAnswer.textContent = verb.ru;
+  els.cardsRuRow.hidden = false;
   els.cardsAnswers.hidden = !cardsShown;
   els.cardsToggle.textContent = cardsShown ? "Скрыть ответ" : "Показать ответ";
 };
@@ -392,7 +485,7 @@ const setQuizVerb = (verb) => {
       "Заполните все 3 поля отдельно: 1-я форма в первое, 2-я во второе, 3-я в третье.";
   } else {
     els.quizMain.textContent = `${verb.base} — ${verb.past} — ${verb.participle}`;
-    els.quizSub.textContent = "Напишите перевод на русский.";
+    els.quizSub.textContent = "Напишите перевод на русский письменно.";
   }
 
   els.quizInputBase.value = "";
@@ -407,18 +500,22 @@ const setQuizVerb = (verb) => {
 };
 
 const nextQuiz = () => {
-  if (!verbs.length) return;
-  setQuizVerb(randomVerb());
+  const verb = randomVerb();
+  if (!verb) return;
+  setQuizVerb(verb);
 };
 
 const renderList = (query = "") => {
-  const learnedCount = verbs.filter((verb) => getProgress(verb.id).mastered).length;
+  const group = getActiveGroup();
+  const verbsInGroup = group.verbs;
+  const learnedCount = verbsInGroup.filter((verb) => getProgress(verb.id).mastered).length;
+
   els.listSummary.textContent =
-    `Выучено: ${learnedCount} из ${verbs.length}. Сначала показаны невыученные слова.`;
+    `${group.label}: выучено ${learnedCount} из ${verbsInGroup.length}. Сначала показаны невыученные слова.`;
   els.listSummary.className = "result";
 
   const q = clean(query);
-  const rows = getOrderedVerbs().filter((verb) => {
+  const rows = getOrderedActiveVerbs().filter((verb) => {
     const progress = getProgress(verb.id);
     const matchesFilter =
       listFilter === "all" ||
@@ -457,32 +554,54 @@ const renderList = (query = "") => {
     .join("");
 };
 
-const refreshProgressViews = () => {
+const refreshViews = () => {
+  renderGroupSummary();
   renderCards();
   if (quizCurrent) renderQuizProgress(quizCurrent);
   renderList(els.listSearch.value);
 };
 
-const checkCardsGuess = (event) => {
-  if (event) event.preventDefault();
-  const verb = currentCardVerb();
-  if (!verb || cardsDirection !== "ru") return;
+const setActiveGroup = (groupId) => {
+  activeGroupId = groupId;
+  saveActiveGroup();
+  cardsPool = [];
+  cardsCursor = 0;
+  cardsShown = false;
+  renderGroupSummary();
+  renderCards();
+  nextQuiz();
+  renderList(els.listSearch.value);
+};
 
-  if (!clean(els.cardsGuessInput.value)) {
-    els.cardsGuessResult.textContent = "Введите английский ответ.";
+const checkCardsGuess = (event) => {
+  event.preventDefault();
+  const verb = currentCardVerb();
+  if (!verb) return;
+
+  const value = els.cardsGuessInput.value;
+  if (!clean(value)) {
+    els.cardsGuessResult.textContent =
+      cardsDirection === "en-ru" ? "Введите перевод на русский." : "Введите английский ответ.";
     els.cardsGuessResult.className = "result bad";
     return;
   }
 
-  const ok = isCorrectEnglish(els.cardsGuessInput.value, verb.base);
+  const ok =
+    cardsDirection === "en-ru"
+      ? isCorrectRu(value, verb.ru)
+      : isCorrectEnglish(value, verb.base);
+
   recordAttempt(verb.id, ok);
-  refreshProgressViews();
+  refreshViews();
 
   if (ok) {
     els.cardsGuessResult.textContent = "Верно";
     els.cardsGuessResult.className = "result ok";
   } else {
-    els.cardsGuessResult.textContent = `Неверно. Правильно: ${verb.base}`;
+    els.cardsGuessResult.textContent =
+      cardsDirection === "en-ru"
+        ? `Неверно. Правильно: ${verb.ru}`
+        : `Неверно. Правильно: ${verb.base}`;
     els.cardsGuessResult.className = "result bad";
   }
 };
@@ -514,10 +633,14 @@ const checkQuiz = (event) => {
       wrongText = `Правильно: ${quizCurrent.base} / ${quizCurrent.past} / ${quizCurrent.participle}`;
     }
   } else {
-    ok = isCorrectRu(els.quizInputRu.value, quizCurrent.ru);
-    if (!ok) {
-      wrongText = `Правильно: ${quizCurrent.ru}`;
+    if (!clean(els.quizInputRu.value)) {
+      els.quizResult.textContent = "Введите перевод на русский.";
+      els.quizResult.className = "result bad";
+      return;
     }
+
+    ok = isCorrectRu(els.quizInputRu.value, quizCurrent.ru);
+    if (!ok) wrongText = `Правильно: ${quizCurrent.ru}`;
   }
 
   recordAttempt(quizCurrent.id, ok);
@@ -525,7 +648,7 @@ const checkQuiz = (event) => {
   if (ok) quizCorrect += 1;
   saveScore();
   renderScore();
-  refreshProgressViews();
+  refreshViews();
 
   if (ok) {
     els.quizResult.textContent = "Верно";
@@ -546,6 +669,10 @@ const bind = () => {
     tab.addEventListener("click", () => switchMode(tab.dataset.mode));
   });
 
+  els.groupSelect.addEventListener("change", (event) => {
+    setActiveGroup(event.target.value);
+  });
+
   els.cardsDirButtons.forEach((button) => {
     button.addEventListener("click", () => {
       cardsDirection = button.dataset.cardsDir;
@@ -555,7 +682,7 @@ const bind = () => {
       els.cardsGuessResult.textContent = " ";
       els.cardsGuessResult.className = "result";
       renderCards();
-      if (cardsDirection === "ru") els.cardsGuessInput.focus();
+      els.cardsGuessInput.focus();
     });
   });
 
@@ -615,11 +742,13 @@ const start = () => {
   initVoice();
   bind();
 
-  if (!verbs.length) {
+  if (!verbs.length || !groups.length) {
     setNoData();
     return;
   }
 
+  renderGroupOptions();
+  renderGroupSummary();
   syncCardsPool();
   applyQuizDirection();
   renderCards();

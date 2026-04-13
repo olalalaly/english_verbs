@@ -109,6 +109,27 @@ body {
   background: #fff;
 }
 
+.study-group-panel {
+  margin-bottom: 12px;
+}
+
+.group-toolbar {
+  display: grid;
+  gap: 10px;
+}
+
+.group-picker {
+  max-width: 340px;
+}
+
+.group-picker select {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+  color: var(--ink);
+}
+
 .mode-switch {
   display: flex;
   gap: 8px;

@@ -22,10 +22,20 @@
       <button class="tab" data-mode="list" type="button">Список</button>
     </nav>
 
+    <section class="panel study-group-panel">
+      <div class="group-toolbar">
+        <label class="group-picker">
+          Учебная группа
+          <select id="group-select"></select>
+        </label>
+        <p id="group-summary" class="result"> </p>
+      </div>
+    </section>
+
     <section class="panel mode mode-cards is-active" data-panel="cards">
       <div class="mode-switch" role="group" aria-label="Тип карточек">
-        <button class="mini-switch cards-dir is-active" data-cards-dir="en" type="button">EN карточка</button>
-        <button class="mini-switch cards-dir" data-cards-dir="ru" type="button">RU → EN</button>
+        <button class="mini-switch cards-dir is-active" data-cards-dir="en-ru" type="button">EN → RU</button>
+        <button class="mini-switch cards-dir" data-cards-dir="ru-en" type="button">RU → EN</button>
       </div>
 
       <div class="card-head">
@@ -43,12 +53,12 @@
       <p id="cards-hint">—</p>
       <p id="cards-mode-note" class="result"> </p>
 
-      <form id="cards-guess-form" class="inline-form" autocomplete="off" hidden>
+      <form id="cards-guess-form" class="inline-form" autocomplete="off">
         <label>
-          <span id="cards-guess-label">Введите 1-ю форму (base) на английском</span>
-          <input id="cards-guess-input" type="text" placeholder="Например: go">
+          <span id="cards-guess-label">Введите перевод на русский</span>
+          <input id="cards-guess-input" type="text" placeholder="Например: быть">
         </label>
-        <button id="cards-guess-check" type="submit">Проверить</button>
+        <button type="submit">Проверить</button>
       </form>
       <p id="cards-guess-result" class="result"> </p>
 
