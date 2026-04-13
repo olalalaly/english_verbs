@@ -119,15 +119,42 @@ body {
 }
 
 .group-picker {
+  display: grid;
+  gap: 6px;
   max-width: 340px;
+  font-weight: 600;
 }
 
 .group-picker select {
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 10px;
   background: #fff;
   color: var(--ink);
+}
+
+.group-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.group-button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.group-button.is-active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, #fff 85%);
+  font-weight: 600;
 }
 
 .mode-switch {

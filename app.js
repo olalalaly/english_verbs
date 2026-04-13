@@ -203,6 +203,7 @@ const els = {
 
   groupSelect: document.getElementById("group-select"),
   groupSummary: document.getElementById("group-summary"),
+  groupButtons: document.getElementById("group-buttons"),
 
   cardsDirButtons: document.querySelectorAll(".cards-dir"),
   cardsIndex: document.getElementById("cards-index"),
@@ -396,7 +397,23 @@ const renderGroupOptions = () => {
   els.groupSelect.innerHTML = groups
     .map((group) => `<option value="${group.id}">${group.label}</option>`)
     .join("");
-  els.groupSelect.value = getActiveGroup().id;
+};
+
+const renderGroupButtons = () => {
+  els.groupButtons.innerHTML = groups
+    .map(
+      (group) =>
+        `<button class="group-button" data-group-id="${group.id}" type="button">${group.label}</button>`
+    )
+    .join("");
+};
+
+const syncGroupControls = () => {
+  const activeId = getActiveGroup().id;
+  els.groupSelect.value = activeId;
+  els.groupButtons.querySelectorAll(".group-button").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.groupId === activeId);
+  });
 };
 
 const renderGroupSummary = () => {
@@ -562,8 +579,10 @@ const refreshViews = () => {
 };
 
 const setActiveGroup = (groupId) => {
+  if (!groups.some((group) => group.id === groupId)) return;
   activeGroupId = groupId;
   saveActiveGroup();
+  syncGroupControls();
   cardsPool = [];
   cardsCursor = 0;
   cardsShown = false;
@@ -673,6 +692,12 @@ const bind = () => {
     setActiveGroup(event.target.value);
   });
 
+  els.groupButtons.addEventListener("click", (event) => {
+    const button = event.target.closest(".group-button");
+    if (!button) return;
+    setActiveGroup(button.dataset.groupId);
+  });
+
   els.cardsDirButtons.forEach((button) => {
     button.addEventListener("click", () => {
       cardsDirection = button.dataset.cardsDir;
@@ -748,6 +773,8 @@ const start = () => {
   }
 
   renderGroupOptions();
+  renderGroupButtons();
+  syncGroupControls();
   renderGroupSummary();
   syncCardsPool();
   applyQuizDirection();
