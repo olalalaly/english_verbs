@@ -26,11 +26,33 @@
       <div class="group-toolbar">
         <label class="group-picker">
           Учебная группа
-          <select id="group-select"></select>
+          <select id="group-select">
+            <option value="1">Группа 1 · Формы не меняются</option>
+            <option value="2">Группа 2 · Короткие формы на -t / -d</option>
+            <option value="3">Группа 3 · Частые короткие формы</option>
+            <option value="4">Группа 4 · Семья -ought / -aught</option>
+            <option value="5">Группа 5 · Чередование i-a-u</option>
+            <option value="6">Группа 6 · Формы на -ew / -own</option>
+            <option value="7">Группа 7 · Формы на -oke / -oken</option>
+            <option value="8">Группа 8 · Сильные формы на -n</option>
+            <option value="9">Группа 9 · Сильные и особые формы</option>
+            <option value="10">Группа 10 · Бытовые и разговорные</option>
+          </select>
         </label>
-        <p id="group-summary" class="result"> </p>
+        <p id="group-summary" class="result">Выберите группу: можно через список или кнопки ниже.</p>
       </div>
-      <div id="group-buttons" class="group-buttons" role="group" aria-label="Выбор учебной группы"></div>
+      <div id="group-buttons" class="group-buttons" role="group" aria-label="Выбор учебной группы">
+        <button class="group-button is-active" data-group-id="1" type="button">Группа 1</button>
+        <button class="group-button" data-group-id="2" type="button">Группа 2</button>
+        <button class="group-button" data-group-id="3" type="button">Группа 3</button>
+        <button class="group-button" data-group-id="4" type="button">Группа 4</button>
+        <button class="group-button" data-group-id="5" type="button">Группа 5</button>
+        <button class="group-button" data-group-id="6" type="button">Группа 6</button>
+        <button class="group-button" data-group-id="7" type="button">Группа 7</button>
+        <button class="group-button" data-group-id="8" type="button">Группа 8</button>
+        <button class="group-button" data-group-id="9" type="button">Группа 9</button>
+        <button class="group-button" data-group-id="10" type="button">Группа 10</button>
+      </div>
     </section>
 
     <section class="panel mode mode-cards is-active" data-panel="cards">
