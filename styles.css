@@ -241,15 +241,48 @@ p {
   margin: 0 0 12px;
 }
 
-.helper-note {
+.hint-wrap {
+  display: grid;
+  gap: 10px;
   margin-top: -4px;
   margin-bottom: 14px;
-  padding: 10px 12px;
+}
+
+.hint-toggle {
+  justify-self: start;
+}
+
+.hint-flip {
+  perspective: 1000px;
+}
+
+.hint-flip-inner {
+  position: relative;
+  min-height: 92px;
+  transform-style: preserve-3d;
+  transition: transform 260ms ease;
+}
+
+.hint-flip.is-flipped .hint-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.hint-face {
+  position: absolute;
+  inset: 0;
+  padding: 12px 14px;
   border: 1px solid color-mix(in srgb, var(--accent-2) 45%, #ffffff 55%);
-  border-radius: 10px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--accent-2) 12%, #ffffff 88%);
   color: #6d520e;
   font-size: 0.95rem;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.hint-back {
+  transform: rotateY(180deg);
 }
 
 .answers {

@@ -75,6 +75,15 @@
       <h2 id="cards-main">—</h2>
       <p id="cards-hint">—</p>
       <p id="cards-mode-note" class="result"> </p>
+      <div id="cards-hint-wrap" class="hint-wrap" hidden>
+        <button id="cards-hint-toggle" class="ghost hint-toggle" type="button">Подсказка</button>
+        <div id="cards-hint-flip" class="hint-flip" aria-live="polite">
+          <div class="hint-flip-inner">
+            <div class="hint-face hint-front">Подсказка скрыта. Нажмите кнопку, если хотите вспомнить различие.</div>
+            <div id="cards-clarify" class="hint-face hint-back"></div>
+          </div>
+        </div>
+      </div>
 
       <form id="cards-guess-form" class="inline-form" autocomplete="off">
         <label>
@@ -129,7 +138,15 @@
       </div>
       <h2 id="quiz-main">—</h2>
       <p id="quiz-sub">—</p>
-      <p id="quiz-clarify" class="helper-note" hidden></p>
+      <div id="quiz-hint-wrap" class="hint-wrap" hidden>
+        <button id="quiz-hint-toggle" class="ghost hint-toggle" type="button">Подсказка</button>
+        <div id="quiz-hint-flip" class="hint-flip" aria-live="polite">
+          <div class="hint-flip-inner">
+            <div class="hint-face hint-front">Подсказка скрыта. Нажмите кнопку, если хотите вспомнить различие.</div>
+            <div id="quiz-clarify" class="hint-face hint-back"></div>
+          </div>
+        </div>
+      </div>
 
       <form id="quiz-form" autocomplete="off">
         <label id="quiz-field-base">

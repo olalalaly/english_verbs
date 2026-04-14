@@ -122,19 +122,65 @@ const sourceVerbs =
 
 const verbs = sourceVerbs.filter((verb) => verb.base);
 const verbByBase = Object.fromEntries(verbs.map((verb) => [verb.base, verb]));
+const clarificationNotes = {
+  movement: "come = прийти сюда; go = уйти / поехать туда; bring = принести сюда; take = унести / взять с собой.",
+  speech: "say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
+  action: "do = делать действие; make = делать / создавать результат.",
+  layLie: "lay = класть что-то; lie = лежать.",
+  holdKeep: "hold = держать руками; keep = сохранять / оставлять; stay = оставаться; remain = оставаться формальнее.",
+  teachLearn: "learn = учиться / узнавать; teach = учить кого-то.",
+  perception: "hear = слышать; see = видеть. listen / look / watch сюда не относятся.",
+  search: "seek = искать; find = находить.",
+  transport: "ride = ехать верхом / на велосипеде; drive = вести машину; go = идти / ехать вообще.",
+  position: "sit = сидеть; stand = стоять; rise = подниматься.",
+  money: "pay = платить; spend = тратить деньги или время.",
+  meaning: "mean = значить / иметь в виду; understand = понимать.",
+  display: "show = показывать; tell = сообщать словами.",
+  clothing: "wear = носить на себе; put = класть / ставить. put on в этом наборе нет.",
+  loan: "lend = дать взаймы; borrow = взять взаймы. borrow в этом наборе нет.",
+  getTakeGive: "get = получать / доставать; take = брать; give = давать.",
+  leaveGo: "leave = уйти / оставить; go = идти / ехать.",
+  know: "know = знать; значение 'уметь' обычно передается через can.",
+  meeting: "meet = встретиться лично; see = видеть.",
+};
 const verbClarifications = {
-  say: {
-    ru: "сказать что-то, произнести слова",
-    note: "Подсказка: say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
-  },
-  tell: {
-    ru: "сказать кому-то, сообщить, рассказать",
-    note: "Подсказка: say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
-  },
-  speak: {
-    ru: "говорить, разговаривать, владеть языком",
-    note: "Подсказка: say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
-  },
+  bring: { ru: "принести сюда, принести с собой", note: clarificationNotes.movement },
+  come: { ru: "приходить сюда, приезжать сюда", note: clarificationNotes.movement },
+  do: { ru: "делать, выполнять действие", note: clarificationNotes.action },
+  drive: { ru: "вести машину", note: clarificationNotes.transport },
+  find: { ru: "находить", note: clarificationNotes.search },
+  get: { ru: "получать, доставать", note: clarificationNotes.getTakeGive },
+  give: { ru: "давать", note: clarificationNotes.getTakeGive },
+  go: { ru: "идти туда, уходить, ехать", note: clarificationNotes.movement },
+  hear: { ru: "слышать", note: clarificationNotes.perception },
+  hold: { ru: "держать руками", note: clarificationNotes.holdKeep },
+  keep: { ru: "сохранять, держать у себя, не менять", note: clarificationNotes.holdKeep },
+  know: { ru: "знать", note: clarificationNotes.know },
+  lay: { ru: "класть что-то", note: clarificationNotes.layLie },
+  learn: { ru: "учиться, узнавать", note: clarificationNotes.teachLearn },
+  leave: { ru: "уйти, уехать, оставить", note: clarificationNotes.leaveGo },
+  lend: { ru: "давать взаймы", note: clarificationNotes.loan },
+  lie: { ru: "лежать", note: clarificationNotes.layLie },
+  make: { ru: "делать, создавать результат", note: clarificationNotes.action },
+  mean: { ru: "значить, иметь в виду", note: clarificationNotes.meaning },
+  meet: { ru: "встретиться лично", note: clarificationNotes.meeting },
+  pay: { ru: "платить", note: clarificationNotes.money },
+  put: { ru: "класть, ставить, помещать", note: clarificationNotes.clothing },
+  ride: { ru: "ехать верхом, на велосипеде, на мотоцикле", note: clarificationNotes.transport },
+  rise: { ru: "подниматься, вставать", note: clarificationNotes.position },
+  say: { ru: "сказать что-то, произнести слова", note: clarificationNotes.speech },
+  see: { ru: "видеть", note: clarificationNotes.perception },
+  seek: { ru: "искать", note: clarificationNotes.search },
+  show: { ru: "показывать", note: clarificationNotes.display },
+  sit: { ru: "сидеть", note: clarificationNotes.position },
+  spend: { ru: "тратить деньги, проводить время", note: clarificationNotes.money },
+  speak: { ru: "говорить, разговаривать, владеть языком", note: clarificationNotes.speech },
+  stand: { ru: "стоять", note: clarificationNotes.position },
+  take: { ru: "брать, взять с собой, отнести", note: clarificationNotes.movement },
+  teach: { ru: "учить кого-то, преподавать", note: clarificationNotes.teachLearn },
+  tell: { ru: "сказать кому-то, сообщить, рассказать", note: clarificationNotes.speech },
+  understand: { ru: "понимать", note: clarificationNotes.meaning },
+  wear: { ru: "носить на себе, быть одетым", note: clarificationNotes.clothing },
 };
 
 const buildGroups = () => {
@@ -226,6 +272,10 @@ const els = {
   cardsMain: document.getElementById("cards-main"),
   cardsHint: document.getElementById("cards-hint"),
   cardsModeNote: document.getElementById("cards-mode-note"),
+  cardsHintWrap: document.getElementById("cards-hint-wrap"),
+  cardsHintToggle: document.getElementById("cards-hint-toggle"),
+  cardsHintFlip: document.getElementById("cards-hint-flip"),
+  cardsClarify: document.getElementById("cards-clarify"),
   cardsGuessLabel: document.getElementById("cards-guess-label"),
   cardsBase: document.getElementById("cards-base"),
   cardsPast: document.getElementById("cards-past"),
@@ -247,6 +297,9 @@ const els = {
   quizRating: document.getElementById("quiz-rating"),
   quizMain: document.getElementById("quiz-main"),
   quizSub: document.getElementById("quiz-sub"),
+  quizHintWrap: document.getElementById("quiz-hint-wrap"),
+  quizHintToggle: document.getElementById("quiz-hint-toggle"),
+  quizHintFlip: document.getElementById("quiz-hint-flip"),
   quizClarify: document.getElementById("quiz-clarify"),
   quizForm: document.getElementById("quiz-form"),
   quizFieldBase: document.getElementById("quiz-field-base"),
@@ -279,6 +332,8 @@ let listFilter = "all";
 let quizCurrent = null;
 let quizTotal = Number(localStorage.getItem(QUIZ_TOTAL_KEY) || 0);
 let quizCorrect = Number(localStorage.getItem(QUIZ_CORRECT_KEY) || 0);
+let cardsHintOpen = false;
+let quizHintOpen = false;
 
 const saveScore = () => {
   localStorage.setItem(QUIZ_TOTAL_KEY, String(quizTotal));
@@ -362,7 +417,23 @@ const getOrderedActiveVerbs = () => [...getActiveGroupVerbs()].sort(compareVerbs
 
 const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
 const getVerbClarification = (verb) => verbClarifications[verb?.base] || null;
-const getPracticeRuText = (verb) => getVerbClarification(verb)?.ru || verb?.ru || "";
+const getDisplayRuText = (verb) => getVerbClarification(verb)?.ru || verb?.ru || "";
+const isCorrectRuForVerb = (input, verb) =>
+  isCorrectRu(input, verb?.ru) || (getVerbClarification(verb)?.ru && isCorrectRu(input, getVerbClarification(verb).ru));
+const setHintState = (wrapEl, flipEl, toggleEl, noteEl, isOpen, note) => {
+  const hasNote = Boolean(note);
+  wrapEl.hidden = !hasNote;
+  if (!hasNote) {
+    flipEl.classList.remove("is-flipped");
+    toggleEl.textContent = "Подсказка";
+    noteEl.textContent = "";
+    return;
+  }
+
+  noteEl.textContent = note;
+  flipEl.classList.toggle("is-flipped", isOpen);
+  toggleEl.textContent = isOpen ? "Скрыть подсказку" : "Подсказка";
+};
 
 const randomVerb = () => {
   const ordered = getOrderedActiveVerbs();
@@ -445,8 +516,10 @@ const setNoData = () => {
   els.cardsIndex.textContent = "0 / 0";
   els.cardsMain.textContent = "Данные не загружены";
   els.cardsHint.textContent = "Проверьте файл verbs-data.js";
+  els.cardsHintWrap.hidden = true;
   els.quizMain.textContent = "Данные не загружены";
   els.quizSub.textContent = "Проверьте файл verbs-data.js";
+  els.quizHintWrap.hidden = true;
   els.groupSummary.textContent = "";
   els.listSummary.textContent = "";
   els.listBody.innerHTML = "";
@@ -456,6 +529,7 @@ const renderCards = () => {
   syncCardsPool();
   const verb = currentCardVerb();
   if (!verb) return;
+  const clarification = getVerbClarification(verb);
 
   setProgressPills(els.cardsStatus, els.cardsRating, verb);
   els.cardsIndex.textContent = `${cardsCursor + 1} / ${cardsPool.length}`;
@@ -467,17 +541,18 @@ const renderCards = () => {
     els.cardsGuessLabel.textContent = "Введите перевод на русский";
     els.cardsGuessInput.placeholder = "Например: быть";
   } else {
-    els.cardsMain.textContent = verb.ru;
+    els.cardsMain.textContent = getDisplayRuText(verb);
     els.cardsHint.textContent = "Напишите 1-ю форму (base) на английском.";
     els.cardsModeNote.textContent = `${getProgressMeta(verb.id).hintText}.`;
     els.cardsGuessLabel.textContent = "Введите 1-ю форму (base) на английском";
     els.cardsGuessInput.placeholder = "Например: be";
   }
 
+  setHintState(els.cardsHintWrap, els.cardsHintFlip, els.cardsHintToggle, els.cardsClarify, cardsHintOpen, clarification?.note);
   els.cardsBase.textContent = verb.base;
   els.cardsPast.textContent = verb.past;
   els.cardsParticiple.textContent = verb.participle;
-  els.cardsRuAnswer.textContent = verb.ru;
+  els.cardsRuAnswer.textContent = getDisplayRuText(verb);
   els.cardsRuRow.hidden = false;
   els.cardsAnswers.hidden = !cardsShown;
   els.cardsToggle.textContent = cardsShown ? "Скрыть ответ" : "Показать ответ";
@@ -489,6 +564,7 @@ const nextCard = () => {
 
   cardsCursor = (cardsCursor + 1) % cardsPool.length;
   cardsShown = false;
+  cardsHintOpen = false;
   els.cardsGuessInput.value = "";
   els.cardsGuessResult.textContent = " ";
   els.cardsGuessResult.className = "result";
@@ -497,6 +573,11 @@ const nextCard = () => {
 
 const renderQuizProgress = (verb) => {
   setProgressPills(els.quizStatus, els.quizRating, verb);
+};
+
+const renderQuizHint = () => {
+  const clarification = getVerbClarification(quizCurrent);
+  setHintState(els.quizHintWrap, els.quizHintFlip, els.quizHintToggle, els.quizClarify, quizHintOpen, clarification?.note);
 };
 
 const applyQuizDirection = () => {
@@ -512,10 +593,9 @@ const setQuizVerb = (verb) => {
   if (!verb) return;
 
   renderQuizProgress(verb);
-  const clarification = getVerbClarification(verb);
 
   if (quizDirection === "ru-all") {
-    els.quizMain.textContent = getPracticeRuText(verb);
+    els.quizMain.textContent = getDisplayRuText(verb);
     els.quizSub.textContent =
       "Заполните все 3 поля отдельно: 1-я форма в первое, 2-я во второе, 3-я в третье.";
   } else {
@@ -523,8 +603,7 @@ const setQuizVerb = (verb) => {
     els.quizSub.textContent = "Напишите перевод на русский письменно.";
   }
 
-  els.quizClarify.hidden = !clarification;
-  els.quizClarify.textContent = clarification?.note || "";
+  renderQuizHint();
 
   els.quizInputBase.value = "";
   els.quizInputPast.value = "";
@@ -540,6 +619,7 @@ const setQuizVerb = (verb) => {
 const nextQuiz = () => {
   const verb = randomVerb();
   if (!verb) return;
+  quizHintOpen = false;
   setQuizVerb(verb);
 };
 
@@ -563,7 +643,7 @@ const renderList = (query = "") => {
     if (!matchesFilter) return false;
     if (!q) return true;
 
-    return [verb.base, verb.past, verb.participle, verb.ru].some((item) => clean(item).includes(q));
+    return [verb.base, verb.past, verb.participle, verb.ru, getDisplayRuText(verb)].some((item) => clean(item).includes(q));
   });
 
   if (!rows.length) {
@@ -583,7 +663,7 @@ const renderList = (query = "") => {
         <td>${verb.base}</td>
         <td>${verb.past}</td>
         <td>${verb.participle}</td>
-        <td>${verb.ru}</td>
+        <td>${getDisplayRuText(verb)}</td>
         <td><span class="progress-pill ${meta.statusClass}">${meta.statusText}</span></td>
         <td>${meta.ratingText}</td>
         <td><button class="mini list-speak" data-id="${verb.id}" type="button">Voice</button></td>
@@ -607,6 +687,8 @@ const setActiveGroup = (groupId) => {
   cardsPool = [];
   cardsCursor = 0;
   cardsShown = false;
+  cardsHintOpen = false;
+  quizHintOpen = false;
   renderGroupSummary();
   renderCards();
   nextQuiz();
@@ -628,7 +710,7 @@ const checkCardsGuess = (event) => {
 
   const ok =
     cardsDirection === "en-ru"
-      ? isCorrectRu(value, verb.ru)
+      ? isCorrectRuForVerb(value, verb)
       : isCorrectEnglish(value, verb.base);
 
   recordAttempt(verb.id, ok);
@@ -640,7 +722,7 @@ const checkCardsGuess = (event) => {
   } else {
     els.cardsGuessResult.textContent =
       cardsDirection === "en-ru"
-        ? `Неверно. Правильно: ${verb.ru}`
+        ? `Неверно. Правильно: ${getDisplayRuText(verb)}`
         : `Неверно. Правильно: ${verb.base}`;
     els.cardsGuessResult.className = "result bad";
   }
@@ -679,8 +761,8 @@ const checkQuiz = (event) => {
       return;
     }
 
-    ok = isCorrectRu(els.quizInputRu.value, quizCurrent.ru);
-    if (!ok) wrongText = `Правильно: ${quizCurrent.ru}`;
+    ok = isCorrectRuForVerb(els.quizInputRu.value, quizCurrent);
+    if (!ok) wrongText = `Правильно: ${getDisplayRuText(quizCurrent)}`;
   }
 
   recordAttempt(quizCurrent.id, ok);
@@ -724,6 +806,7 @@ const bind = () => {
       cardsDirection = button.dataset.cardsDir;
       els.cardsDirButtons.forEach((item) => item.classList.toggle("is-active", item === button));
       cardsShown = false;
+      cardsHintOpen = false;
       els.cardsGuessInput.value = "";
       els.cardsGuessResult.textContent = " ";
       els.cardsGuessResult.className = "result";
@@ -744,12 +827,17 @@ const bind = () => {
     if (!verb) return;
     speak(`${verb.base}, ${verb.past}, ${verb.participle}`);
   });
+  els.cardsHintToggle.addEventListener("click", () => {
+    cardsHintOpen = !cardsHintOpen;
+    renderCards();
+  });
   els.cardsGuessForm.addEventListener("submit", checkCardsGuess);
 
   els.quizDirButtons.forEach((button) => {
     button.addEventListener("click", () => {
       quizDirection = button.dataset.quizDir;
       els.quizDirButtons.forEach((item) => item.classList.toggle("is-active", item === button));
+      quizHintOpen = false;
       applyQuizDirection();
       nextQuiz();
     });
@@ -757,6 +845,10 @@ const bind = () => {
 
   els.quizForm.addEventListener("submit", checkQuiz);
   els.quizNext.addEventListener("click", nextQuiz);
+  els.quizHintToggle.addEventListener("click", () => {
+    quizHintOpen = !quizHintOpen;
+    renderQuizHint();
+  });
   els.quizSpeakWord.addEventListener("click", () => speak(quizCurrent?.base));
   els.quizSpeakForms.addEventListener("click", () => {
     if (!quizCurrent) return;
