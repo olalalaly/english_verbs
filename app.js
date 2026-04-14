@@ -122,6 +122,20 @@ const sourceVerbs =
 
 const verbs = sourceVerbs.filter((verb) => verb.base);
 const verbByBase = Object.fromEntries(verbs.map((verb) => [verb.base, verb]));
+const verbClarifications = {
+  say: {
+    ru: "сказать что-то, произнести слова",
+    note: "Подсказка: say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
+  },
+  tell: {
+    ru: "сказать кому-то, сообщить, рассказать",
+    note: "Подсказка: say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
+  },
+  speak: {
+    ru: "говорить, разговаривать, владеть языком",
+    note: "Подсказка: say = сказать что-то; tell = сказать кому-то; speak = говорить / владеть языком; talk = разговаривать.",
+  },
+};
 
 const buildGroups = () => {
   const groupSpecs = [
@@ -233,6 +247,7 @@ const els = {
   quizRating: document.getElementById("quiz-rating"),
   quizMain: document.getElementById("quiz-main"),
   quizSub: document.getElementById("quiz-sub"),
+  quizClarify: document.getElementById("quiz-clarify"),
   quizForm: document.getElementById("quiz-form"),
   quizFieldBase: document.getElementById("quiz-field-base"),
   quizFieldPast: document.getElementById("quiz-field-past"),
@@ -346,6 +361,8 @@ const getActiveGroupVerbs = () => getActiveGroup()?.verbs || [];
 const getOrderedActiveVerbs = () => [...getActiveGroupVerbs()].sort(compareVerbsByProgress);
 
 const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
+const getVerbClarification = (verb) => verbClarifications[verb?.base] || null;
+const getPracticeRuText = (verb) => getVerbClarification(verb)?.ru || verb?.ru || "";
 
 const randomVerb = () => {
   const ordered = getOrderedActiveVerbs();
@@ -495,15 +512,19 @@ const setQuizVerb = (verb) => {
   if (!verb) return;
 
   renderQuizProgress(verb);
+  const clarification = getVerbClarification(verb);
 
   if (quizDirection === "ru-all") {
-    els.quizMain.textContent = verb.ru;
+    els.quizMain.textContent = getPracticeRuText(verb);
     els.quizSub.textContent =
       "Заполните все 3 поля отдельно: 1-я форма в первое, 2-я во второе, 3-я в третье.";
   } else {
     els.quizMain.textContent = `${verb.base} — ${verb.past} — ${verb.participle}`;
     els.quizSub.textContent = "Напишите перевод на русский письменно.";
   }
+
+  els.quizClarify.hidden = !clarification;
+  els.quizClarify.textContent = clarification?.note || "";
 
   els.quizInputBase.value = "";
   els.quizInputPast.value = "";

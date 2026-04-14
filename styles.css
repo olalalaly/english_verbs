@@ -241,6 +241,17 @@ p {
   margin: 0 0 12px;
 }
 
+.helper-note {
+  margin-top: -4px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 45%, #ffffff 55%);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-2) 12%, #ffffff 88%);
+  color: #6d520e;
+  font-size: 0.95rem;
+}
+
 .answers {
   border: 1px dashed var(--line);
   border-radius: 10px;
